@@ -60,7 +60,7 @@ public class PrescriptionManagementServlet extends HttpServlet {
         request.setAttribute("selectedPatient", selectedPatient);
 
 
-        request.getRequestDispatcher("/WEB-INF/jsp/prescriptionManagement.jsp").forward(request, response);
+        request.getRequestDispatcher("/prescriptionManagement.jsp").forward(request, response);
     }
 
     @SuppressWarnings("unchecked")
