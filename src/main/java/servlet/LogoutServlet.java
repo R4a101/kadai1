@@ -12,9 +12,10 @@ import jakarta.servlet.http.HttpSession;
 @WebServlet("/logout")
 public class LogoutServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
+            throws ServletException, IOException {
         HttpSession session = request.getSession(false);
         if (session != null) session.invalidate();
         response.sendRedirect("logout.jsp");
     }
 }
+

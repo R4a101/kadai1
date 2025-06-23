@@ -18,16 +18,7 @@ public class PatientRegistServlet extends HttpServlet {
             throws ServletException, IOException {
 
         request.setCharacterEncoding("UTF-8");
-        // 受付権限チェック
-        HttpSession session = request.getSession(false);
-        String role = (session != null) ? (String) session.getAttribute("role") : null;
-        if (role == null || !"reception".equals(role)) {
-            response.sendRedirect(request.getContextPath() + "/login.jsp");
-            return;
-        }
-
-        // 既存のセッション取得
-        // HttpSession session = request.getSession(); // 上で取得済み
+        HttpSession session = request.getSession();
 
         // パラメータ取得
         String patid = request.getParameter("patid");
@@ -37,18 +28,38 @@ public class PatientRegistServlet extends HttpServlet {
         String hokenexp = request.getParameter("hokenexp");
 
         // 登録者情報（セッションから取得）
-        // roleチェックとは別に、empidがセッションにあるか確認する必要がある。
-        // SessionからEmployeeオブジェクトを取得して、そこからempidを取得する方がより堅牢。
-        // Employee emp = (Employee) session.getAttribute("employee");
-        // String registeredBy = (emp != null) ? emp.getEmpid() : null;
-        String registeredBy = (String) session.getAttribute("empid"); // 既存のempidセッション属性を利用する場合
-
+        String registeredBy = (String) session.getAttribute("empid");
         if (registeredBy == null) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "認証情報がありません");
             return;
         }
 
-        // ... (以降の既存ロジック) ...
+        // バリデーション
+        if (!isValidInput(patid, patlname, patfname, hokenmei, hokenexp)) {
+            request.setAttribute("error", "入力内容に不備があります");
+            request.getRequestDispatcher("patientRegist.jsp").forward(request, response);
+            return;
+        }
+
+        PatientDAO dao = new PatientDAO();
+        boolean result = dao.insertPatient(patid, patlname, patfname, hokenmei, hokenexp, registeredBy);
+
+        if (result) {
+            session.setAttribute("success", "患者登録が完了しました");
+            response.sendRedirect("reception_menu.jsp");
+        } else {
+            request.setAttribute("error", "患者登録に失敗しました");
+            request.getRequestDispatcher("patientRegist.jsp").forward(request, response);
+        }
     }
-    // doGetメソッドももしあれば、その冒頭にも追加してください
+
+    private boolean isValidInput(String... inputs) {
+        for (String input : inputs) {
+            if (input == null || input.trim().isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
+

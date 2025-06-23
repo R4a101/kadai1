@@ -54,13 +54,13 @@ public class PrescriptionManagementServlet extends HttpServlet {
             currentPrescriptionItems = new ArrayList<>();
             session.setAttribute("currentPrescriptionItems", currentPrescriptionItems);
         }
-        
+
         // セッションから選択された患者を取得
         Patient selectedPatient = (Patient) session.getAttribute("selectedPatient");
         request.setAttribute("selectedPatient", selectedPatient);
 
 
-        request.getRequestDispatcher("/prescriptionManagement.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/jsp/prescriptionManagement.jsp").forward(request, response);
     }
 
     @SuppressWarnings("unchecked")
@@ -78,13 +78,13 @@ public class PrescriptionManagementServlet extends HttpServlet {
         if ("selectPatient".equals(action)) {
             String patientId = request.getParameter("patientId");
             Optional<Patient> patientOpt = availablePatients.stream()
-                                             .filter(p -> p.getPatientId().equals(patientId))
-                                             .findFirst();
+                    .filter(p -> p.getPatientId().equals(patientId))
+                    .findFirst();
             if (patientOpt.isPresent()) {
                 session.setAttribute("selectedPatient", patientOpt.get());
                 // 新しい患者が選択されたら、以前の項目をクリアするか、この患者の既存の項目をロードします
                 // この例ではクリアします。実際のアプリでは、保存された処方箋をロードするかもしれません。
-                currentPrescriptionItems.clear(); 
+                currentPrescriptionItems.clear();
             } else {
                 session.removeAttribute("selectedPatient");
                 currentPrescriptionItems.clear();
@@ -100,8 +100,8 @@ public class PrescriptionManagementServlet extends HttpServlet {
 
                 if (medicineId != null && !medicineId.isEmpty() && dosage != null && !dosage.isEmpty() && instructions != null && !instructions.isEmpty()) {
                     Optional<Medicine> medOpt = availableMedicines.stream()
-                                                 .filter(m -> m.getMedicineId().equals(medicineId))
-                                                 .findFirst();
+                            .filter(m -> m.getMedicineId().equals(medicineId))
+                            .findFirst();
                     if (medOpt.isPresent()) {
                         PrescriptionItem newItem = new PrescriptionItem(medicineId, medOpt.get().getMedicineName(), dosage, instructions);
                         currentPrescriptionItems.add(newItem);
@@ -115,8 +115,8 @@ public class PrescriptionManagementServlet extends HttpServlet {
         } else if ("deleteMedicine".equals(action)) {
             String tempIdToDelete = request.getParameter("tempId");
             currentPrescriptionItems = currentPrescriptionItems.stream()
-                                       .filter(item -> !item.getTempId().equals(tempIdToDelete))
-                                       .collect(Collectors.toList());
+                    .filter(item -> !item.getTempId().equals(tempIdToDelete))
+                    .collect(Collectors.toList());
         } else if ("confirmPrescription".equals(action)) {
             Patient selectedPatient = (Patient) session.getAttribute("selectedPatient");
             if (selectedPatient != null && !currentPrescriptionItems.isEmpty()) {
@@ -132,9 +132,9 @@ public class PrescriptionManagementServlet extends HttpServlet {
                 response.sendRedirect("doctor_menu.jsp"); // または確認ページへ
                 return; // sendRedirectの後はreturnが重要
             } else if (selectedPatient == null) {
-                 request.setAttribute("errorMessage", "患者が選択されていません。");
+                request.setAttribute("errorMessage", "患者が選択されていません。");
             } else {
-                 request.setAttribute("errorMessage", "処方内容がありません。");
+                request.setAttribute("errorMessage", "処方内容がありません。");
             }
         }
 
@@ -142,7 +142,7 @@ public class PrescriptionManagementServlet extends HttpServlet {
         // POSTアクションの後、フォーム再送信の問題を防ぐためにGETにリダイレクトします
         // または、エラーメッセージなどのリクエスト属性を引き継ぐ必要がある場合はフォワードします
         // 同じページにエラー/メッセージを表示する簡単さのため、フォワードします
-        doGet(request, response); 
+        doGet(request, response);
         // POSTに対するより良いパターンはPost-Redirect-Get (PRG)です
         // response.sendRedirect(request.getContextPath() + "/PrescriptionManagementServlet");
     }

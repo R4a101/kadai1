@@ -11,24 +11,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import DAO.PatientDAO;
-import jakarta.servlet.http.HttpSession;
 
 @WebServlet("/DoctorPatientSearchServlet")
 public class DoctorPatientSearchServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // 医師権限チェック
-        HttpSession session = request.getSession(false);
-        String role = (session != null) ? (String) session.getAttribute("role") : null;
-        if (role == null || !"doctor".equals(role)) {
-            response.sendRedirect(request.getContextPath() + "/login.jsp"); // コンテキストパスを追加
-            return;
-        }
-
         PatientDAO dao = new PatientDAO();
         List<Map<String, Object>> patients = dao.findAllPatients();
         request.setAttribute("patients", patients);
         request.getRequestDispatcher("doctorPatientList.jsp").forward(request, response);
     }
-    // doPostメソッドももしあれば、その冒頭にも追加してください
 }

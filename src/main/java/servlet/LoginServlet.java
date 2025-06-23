@@ -21,7 +21,7 @@ public class LoginServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
+            throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
         String roleParam = request.getParameter("role");
         String userid = request.getParameter("userid");
@@ -36,7 +36,7 @@ public class LoginServlet extends HttpServlet {
                 session.setAttribute("role", "admin");      // セッションにロールを"admin"として設定
                 session.setAttribute("employee", admin);    // ★ セッションに管理者のEmployeeオブジェクトを設定
                 session.setAttribute("userid", admin.getEmpid()); // admin_menu.jspなどで表示用に使っているなら設定
-                                                                  // (employeeオブジェクトから取得できるので必須ではない)
+                // (employeeオブジェクトから取得できるので必須ではない)
                 System.out.println("LoginServlet: Admin login successful. EmpID: " + admin.getEmpid() + ", Name: " + admin.getEmpname() + ", Role set to 'admin'"); //デバッグ
                 response.sendRedirect("admin_menu.jsp");
             } else {
@@ -80,7 +80,7 @@ public class LoginServlet extends HttpServlet {
     // doGetメソッドも実装しておくと、直接URLでアクセスされた場合のエラー処理などができる
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
+            throws ServletException, IOException {
         // 例えば、ログインページにリダイレクトする、またはエラーメッセージを表示するなど
         System.out.println("LoginServlet: doGet called. Redirecting to login.jsp."); //デバッグ
         response.sendRedirect("login.jsp");

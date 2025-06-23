@@ -51,7 +51,7 @@ public class EmployeePasswordChangeServlet extends HttpServlet {
         String passwordInput2 = request.getParameter("password2");
 
         if (passwordInput1 == null || passwordInput1.isEmpty() ||
-            passwordInput2 == null || passwordInput2.isEmpty()) {
+                passwordInput2 == null || passwordInput2.isEmpty()) {
             request.setAttribute("error", "新しいパスワードと確認用パスワードの両方を入力してください。");
             request.getRequestDispatcher("/employeePasswordChange.jsp").forward(request, response);
             return;
@@ -68,10 +68,10 @@ public class EmployeePasswordChangeServlet extends HttpServlet {
         // --- 現在のパスワードと同じかどうかのチェック (DAOの新しいメソッドを使用) ---
         try {
             if (dao.isNewPasswordSameAsCurrent(emp.getEmpid(), passwordInput1)) {
-                 request.setAttribute("error", "新しいパスワードが現在のパスワードと同じです。異なるパスワードを設定してください。");
-                 System.out.println("EmployeePasswordChangeServlet: New password is same as current for EMPID: " + emp.getEmpid());
-                 request.getRequestDispatcher("/employeePasswordChange.jsp").forward(request, response);
-                 return;
+                request.setAttribute("error", "新しいパスワードが現在のパスワードと同じです。異なるパスワードを設定してください。");
+                System.out.println("EmployeePasswordChangeServlet: New password is same as current for EMPID: " + emp.getEmpid());
+                request.getRequestDispatcher("/employeePasswordChange.jsp").forward(request, response);
+                return;
             }
         } catch (RuntimeException e) { // isNewPasswordSameAsCurrent内でsha256エラーが起きた場合など
             System.err.println("EmployeePasswordChangeServlet: Error during password same check for EMPID: " + emp.getEmpid());

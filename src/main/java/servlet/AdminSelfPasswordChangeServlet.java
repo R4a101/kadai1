@@ -19,20 +19,14 @@ public class AdminSelfPasswordChangeServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // 管理者権限チェック
         HttpSession session = request.getSession(false);
-        String role = (session != null) ? (String) session.getAttribute("role") : null;
-        if (role == null || !"admin".equals(role)) {
-            response.sendRedirect(request.getContextPath() + "/login.jsp"); // コンテキストパスを追加
-            return;
-        }
-        // 以下は既存のadminUserチェック。AdminSelfPasswordChangeServletではEmployeeオブジェクトが必要なため残す。
         Employee adminUser = (session != null) ? (Employee) session.getAttribute("employee") : null;
-        if (adminUser == null) { // roleがadminでもemployeeオブジェクトがなければおかしい状況
-            response.sendRedirect(request.getContextPath() + "/login.jsp");
+        String role = (session != null) ? (String) session.getAttribute("role") : null;
+
+        if (adminUser == null || !"admin".equals(role)) {
+            response.sendRedirect("login.jsp");
             return;
         }
-
         request.getRequestDispatcher("adminSelfPasswordChange.jsp").forward(request, response);
     }
 
@@ -40,23 +34,58 @@ public class AdminSelfPasswordChangeServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
-        // 管理者権限チェック
         HttpSession session = request.getSession(false);
-        String role = (session != null) ? (String) session.getAttribute("role") : null;
-        if (role == null || !"admin".equals(role)) {
-            response.sendRedirect(request.getContextPath() + "/login.jsp"); // コンテキストパスを追加
-            return;
-        }
-        // 以下は既存のadminUserチェック。AdminSelfPasswordChangeServletではEmployeeオブジェクトが必要なため残す。
+
         Employee adminUser = (session != null) ? (Employee) session.getAttribute("employee") : null;
-        if (adminUser == null) {
-            response.sendRedirect(request.getContextPath() + "/login.jsp");
+        String role = (session != null) ? (String) session.getAttribute("role") : null;
+
+        if (adminUser == null || !"admin".equals(role)) {
+            response.sendRedirect("login.jsp");
             return;
         }
 
         String newPassword = request.getParameter("newPassword");
         String confirmPassword = request.getParameter("confirmPassword");
 
-        // ... (以降の既存ロジック) ...
+        if (newPassword == null || newPassword.isEmpty() ||
+                confirmPassword == null || confirmPassword.isEmpty()) {
+            request.setAttribute("error", "新しいパスワードと確認用パスワードの両方を入力してください。");
+            request.getRequestDispatcher("adminSelfPasswordChange.jsp").forward(request, response);
+            return;
+        }
+
+        if (!newPassword.equals(confirmPassword)) {
+            request.setAttribute("error", "新しいパスワードが一致しません。");
+            request.getRequestDispatcher("adminSelfPasswordChange.jsp").forward(request, response);
+            return;
+        }
+
+        LoginDAO loginDao = new LoginDAO();
+        String adminUserId = adminUser.getEmpid(); // セッションのEmployeeオブジェクトから管理者IDを取得
+
+        // ★★★修正・追加★★★ 新しいパスワードが現在のパスワードと同じでないかチェック
+        if (loginDao.isNewPasswordSameAsCurrentAdmin(adminUserId, newPassword)) {
+            request.setAttribute("error", "現在のパスワードと同じです。別のパスワードを設定してください。");
+            request.getRequestDispatcher("adminSelfPasswordChange.jsp").forward(request, response);
+            return; // 処理を中断
+        }
+
+        // パスワード更新処理
+        boolean result;
+        try {
+            result = loginDao.updateAdminPassword(adminUserId, newPassword);
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("error", "パスワードの変更中に予期せぬエラーが発生しました。");
+            request.getRequestDispatcher("adminSelfPasswordChange.jsp").forward(request, response);
+            return;
+        }
+
+        if (result) {
+            request.setAttribute("message", "管理者パスワードの変更が完了しました。");
+        } else {
+            request.setAttribute("error", "管理者パスワードの変更に失敗しました。データベース接続などを確認してください。");
+        }
+        request.getRequestDispatcher("adminSelfPasswordChange.jsp").forward(request, response);
     }
 }

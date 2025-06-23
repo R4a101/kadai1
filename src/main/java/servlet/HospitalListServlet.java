@@ -9,7 +9,6 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession; // HttpSessionをインポート
 
 import DAO.HospitalDAO;
 
@@ -18,16 +17,6 @@ public class HospitalListServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8"); // 念のためGETでも設定
-
-        // 管理者権限チェック
-        // HospitalListServletは管理者のみアクセス可能と仮定
-        HttpSession session = request.getSession(false);
-        String role = (session != null) ? (String) session.getAttribute("role") : null;
-        if (role == null || !"admin".equals(role)) { // "admin" 以外のロール、またはログインしていない場合はリダイレクト
-            response.sendRedirect(request.getContextPath() + "/login.jsp");
-            return;
-        }
-
         HospitalDAO dao = new HospitalDAO();
         List<Map<String, String>> hospitals;
 
@@ -56,5 +45,4 @@ public class HospitalListServlet extends HttpServlet {
         request.setAttribute("hospitals", hospitals);
         request.getRequestDispatcher("/hospitalList.jsp").forward(request, response);
     }
-    // doPostメソッドももしあれば、その冒頭にも管理者権限チェックを追加してください
 }

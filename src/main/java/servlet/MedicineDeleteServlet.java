@@ -17,14 +17,6 @@ public class MedicineDeleteServlet extends HttpServlet {
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // 受付または管理者権限チェック
-        HttpSession session = request.getSession(false);
-        String role = (session != null) ? (String) session.getAttribute("role") : null;
-        if (role == null || (!"reception".equals(role))) {
-            response.sendRedirect(request.getContextPath() + "/login.jsp");
-            return;
-        }
-
         // 薬投与削除画面へフォワード
         request.getRequestDispatcher("medicineDelete.jsp").forward(request, response);
     }
@@ -32,17 +24,7 @@ public class MedicineDeleteServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
-        // 受付または管理者権限チェック
-        HttpSession session = request.getSession(false); // doPostでも新たにセッションを取得し直す
-        String role = (session != null) ? (String) session.getAttribute("role") : null;
-        if (role == null || (!"reception".equals(role) && !"admin".equals(role))) {
-            response.sendRedirect(request.getContextPath() + "/login.jsp");
-            return;
-        }
-        // 既存のセッション取得 (doPostの冒頭でHttpSession session = request.getSession(); が既にありますが、
-        // 権限チェックでsessionを再取得しているので、既存のものは削除するか、この後の処理で使用するなら残してください。)
-        // ここでは、権限チェックで取得したsession変数をそのまま使うことを推奨します。
-        // HttpSession session = request.getSession(); // <- これは削除またはコメントアウトしても良い
+        HttpSession session = request.getSession();
 
         String patid = request.getParameter("patid");
         String medicineid = request.getParameter("medicineid");
